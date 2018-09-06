@@ -25,8 +25,18 @@ function(input, output) {
         fromNodes <- c(fromNodes,row)
         toNodes <- c(toNodes,hogar[row,"P6071S1"])
       }
+      if(padre == 1 && hogar[row, 'P6081S1'] != 1){
+        fromNodes <- c(fromNodes, row)
+        toNodes <- c(toNodes, hogar[row, 'P6081S1'])
+      }
+      
+      if(madre == 1 && hogar[row, 'P6083S1'] != 1){
+        fromNodes <- c(fromNodes, row)
+        toNodes <- c(toNodes, hogar[row, 'P6083S1'])
+      }
+      
       if(sexo == 1){
-        if (estadocivil == 5){
+        if (estadocivil == 5) {
           Sex = c(Sex, 'lightgreen')
         } else{
           Sex = c(Sex, 'pink')
@@ -43,5 +53,11 @@ function(input, output) {
     edges <- data.frame(from = fromNodes, to = toNodes)
     
     visNetwork(nodes, edges)
+    visNetwork(nodes, edges, main = "Estructura de Hogar", height = "100%", width = "100%") %>%
+      visEdges(arrows =list(to = list(enabled = TRUE, scaleFactor = 1)),
+               color = list(color = "black")) %>%
+      visPhysics(solver = "forceAtlas2Based", 
+                 forceAtlas2Based = list(gravitationalConstant = -50)) %>%
+      visNodes(size = 35, font = '28px arial black') 
   })
 }
