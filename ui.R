@@ -12,13 +12,13 @@ library(sqldf)
 #             dbname = "CYCH2017")
 
 # look at first three lines
-dirs <- sqldf("select distinct DIRECTORIO from madres", dbname = "CYCH2017", user = "")
+dirs <- sqldf("select distinct LLAVEHOG from madres", dbname = "CYCH2017", user = "")
 
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       verticalLayout(
-        selectInput("directorio", "Directorio:",
+        selectInput("LLAVEHOG", "LLAVE HOGAR:",
                     dirs)
         
       )
