@@ -4,15 +4,22 @@ library(sqldf)
 
 # create an empty database.
 # can skip this step if database already exists.
-# sqldf("attach CYCH2017 as new")
-# # or: cat(file = "testingdb")
+ sqldf("attach mydata as new")
 # 
-# read into table called iris in the testingdb sqlite database
-#read.csv.sql("CYCH2017.csv", sql = "create table main.madres as select * from file",
-#             dbname = "CYCH2017")
+read.csv.sql("CYCH2017.csv", sql = "create table main.hogar as select * from file",
+             dbname = "mydata")
+read.csv.sql("Salud.csv", sql = "create table main.salud as select * from file",
+             dbname = "mydata")
+read.csv.sql("Educacion.csv", sql = "create table main.educacion as select * from file",
+             dbname = "mydata")
+read.csv.sql("Datosvivienda.csv", sql = "create table main.vivienda as select * from file",
+            dbname = "mydata")
+read.csv.sql("Condicionesvida.csv", sql = "create table main.condivida as select * from file",
+            dbname = "mydata")
+closeAllConnections()
 
 # look at first three lines
-dirs <- sqldf("select distinct LLAVEHOG from madres", dbname = "CYCH2017", user = "")
+dirs <- sqldf("select distinct LLAVEHOG from hogar", dbname = "mydata", user = "")
 
 ui <- fluidPage(
   sidebarLayout(
@@ -28,5 +35,6 @@ ui <- fluidPage(
         visNetworkOutput("network")
       )
     )
-  )
+  ),
+  dataTableOutput("tabla")
 )
