@@ -12,6 +12,8 @@ function(input, output) {
     toNodes <- c()
     Groups = c()
     label = c()
+    dashes = c()
+    arrows = c()
   
     for (row in 1:nrow(familia)) {
       queryhijos <- paste("SELECT COUNT(DISTINCT ORDEN) HIJOS FROM hogar WHERE LLAVEHOG = '",dir,sep="")
@@ -29,19 +31,27 @@ function(input, output) {
       if (familia[row,"P6071"] == 1) {
         fromNodes <- c(fromNodes,row)
         toNodes <- c(toNodes,familia[row,"P6071S1"])
+        dashes = c(dashes, TRUE)
+        arrows = c(arrows, "none")
       }
+      
       if(padre == 1){
-        fromNodes <- c(fromNodes, row)
-        toNodes <- c(toNodes, familia[row, 'P6081S1'])
+        fromNodes <- c(fromNodes,familia[row, 'P6081S1'])
+        toNodes <- c(toNodes, row)
+        dashes = c(dashes, FALSE)
+        arrows = c(arrows, "to")
       }
       
       if(madre == 1){
-        fromNodes <- c(fromNodes, row)
-        toNodes <- c(toNodes, familia[row, 'P6083S1'])
+        fromNodes <- c(fromNodes, familia[row, 'P6083S1'])
+        toNodes <- c(toNodes, row)
+        dashes = c(dashes, FALSE)
+        arrows = c(arrows, "to")
       }
       
       if(sexo == 2){
-        if (numHijos > 0 && (estadocivil == 3 || estadocivil == 4 || estadocivil == 5) && (conyuge == 2 || conyuge == Inf)) {
+        if (numHijos > 0 && (estadocivil == 3 || estadocivil == 4 || estadocivil == 5) 
+              && (conyuge == 2 || conyuge == Inf)) {
           Groups = c(Groups, 'SingleMother')
         } else{
           Groups = c(Groups, 'Woman')
@@ -51,11 +61,10 @@ function(input, output) {
       }
     }
     
-    # minimal example
     nodes <- data.frame(id = 1:nrow(familia),
                         group = Groups,
                         label = label)
-    edges <- data.frame(from = fromNodes, to = toNodes)
+    edges <- data.frame(from = fromNodes, to = toNodes, dashes = dashes, arrows = arrows)
     
     visNetwork(nodes, edges, main = "Estructura de Hogar", width = "100%") %>%
       visGroups(groupname = "SingleMother", shape = "icon", 
@@ -72,12 +81,13 @@ function(input, output) {
                      icon = list(code = "f182", color = "pink")),
                 list(label = "Madre Soltera", shape = "icon", 
                      icon = list(code = "f182", color = 'lightgreen'))),
-                useGroups = FALSE) %>%
+                addEdges = data.frame(label = c('Padre/Madre de', 'Esposo(a) de'), 
+                                      dashes = c(FALSE, TRUE), color = 'black', arrows = c("to","none")),
+                width = 0.3, useGroups = FALSE, position = 'right') %>%
       visInteraction(dragNodes = FALSE, 
                dragView = FALSE, 
                zoomView = FALSE) %>%
-      visEdges(arrows =list(to = list(enabled = TRUE, scaleFactor = 1)),
-               color = list(color = "black")) %>%
+      visEdges(color = list(color = "black")) %>%
       visPhysics(solver = "forceAtlas2Based", 
                  forceAtlas2Based = list(gravitationalConstant = -50)) %>%
       visNodes(size = 35, font = '28px arial black') 
