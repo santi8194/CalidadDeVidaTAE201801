@@ -10,7 +10,7 @@ function(input, output) {
     
     fromNodes <- c()
     toNodes <- c()
-    Sex = c()
+    Groups = c()
     label = c()
   
     for (row in 1:nrow(familia)) {
@@ -42,25 +42,40 @@ function(input, output) {
       
       if(sexo == 2){
         if (numHijos > 0 && (estadocivil == 3 || estadocivil == 4 || estadocivil == 5) && (conyuge == 2 || conyuge == Inf)) {
-          Sex = c(Sex, 'lightgreen')
+          Groups = c(Groups, 'SingleMother')
         } else{
-          Sex = c(Sex, 'pink')
+          Groups = c(Groups, 'Woman')
         }
       } else{
-        Sex = c(Sex, 'skyblue')
+        Groups = c(Groups, 'Man')
       }
     }
     
     # minimal example
     nodes <- data.frame(id = 1:nrow(familia),
-                        color = Sex,
+                        group = Groups,
                         label = label)
     edges <- data.frame(from = fromNodes, to = toNodes)
     
     visNetwork(nodes, edges, main = "Estructura de Hogar", width = "100%") %>%
+      visGroups(groupname = "SingleMother", shape = "icon", 
+                icon = list(code = "f182", color = 'lightgreen')) %>%
+      visGroups(groupname = "Man", shape = "icon", 
+              icon = list(code = "f183", color = "skyblue")) %>%
+      visGroups(groupname = "Woman", shape = "icon", 
+                icon = list(code = "f182", color = "pink")) %>%
+      addFontAwesome() %>%
+      visLegend(addNodes = list(
+                list(label = "Hombre", shape = "icon", 
+                     icon = list(code = "f183", color = 'skyblue')),
+                list(label = "Mujer", shape = "icon", 
+                     icon = list(code = "f182", color = "pink")),
+                list(label = "Madre Soltera", shape = "icon", 
+                     icon = list(code = "f182", color = 'lightgreen'))),
+                useGroups = FALSE) %>%
       visInteraction(dragNodes = FALSE, 
-                     dragView = FALSE, 
-                     zoomView = FALSE) %>%
+               dragView = FALSE, 
+               zoomView = FALSE) %>%
       visEdges(arrows =list(to = list(enabled = TRUE, scaleFactor = 1)),
                color = list(color = "black")) %>%
       visPhysics(solver = "forceAtlas2Based", 
@@ -70,7 +85,9 @@ function(input, output) {
   
   output$tabla <- renderDataTable({
     dir <- input$LLAVEHOG
-    query <- paste("SELECT m.ORDEN as id, P6081 as vivePadre, P6083 as viveMadre, P6087 as eduPadre, P6088 as eduMadre, P6090 as afiliadoSalud, P6127 as estadoSalud, P6160 as sabeLeerEscribir, P1070 as tipoVivienda, P9030 as condiVida
+    query <- paste("SELECT m.ORDEN as id, P6081 as vivePadre, P6083 as viveMadre, P6087 as eduPadre, 
+                          P6088 as eduMadre, P6090 as afiliadoSalud, P6127 as estadoSalud, 
+                          P6160 as sabeLeerEscribir, P1070 as tipoVivienda, P9030 as condiVida
                    FROM hogar m
                    INNER join salud s ON m.LLAVEHOG = s.LLAVEHOG AND m.ORDEN = s.ORDEN
                    INNER join educacion e ON m.LLAVEHOG = e.LLAVEHOG AND m.ORDEN = e.ORDEN
